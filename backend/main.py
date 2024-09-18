@@ -20,7 +20,6 @@ aai.settings.api_key = api_key
 
 app = FastAPI()
 
-
 # key - transcript ID, value - transcript JSON obj
 class TranscriptUpdate(BaseModel):
     old_text: str
@@ -97,6 +96,16 @@ async def update_transcript(transcript_id: str, update: TranscriptUpdate):
         "transcript": updated_transcript,
     }
 
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 if __name__ == "__main__":
     print("Starting server on port 8000")

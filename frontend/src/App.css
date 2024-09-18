@@ -1,0 +1,68 @@
+.App {
+  text-align: center;
+  background-color: #f0f8ff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+h1 {
+  color: #1e90ff;
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  animation: fadeIn 1s ease-in;
+}
+
+.input-container {
+  width: 80%;
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.2rem;
+  border: 2px solid #1e90ff;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+}
+
+button {
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: #4169e1;
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.button-spacing {
+  margin-top: 1rem;
+}
+
+.logo {
+  width: 220px;
+  margin-bottom: 1rem;
+}
