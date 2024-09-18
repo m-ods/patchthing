@@ -6,6 +6,7 @@ import os
 from pydantic import BaseModel
 from assemblyai.types import Word, Sentence, Paragraph, Utterance, UtteranceWord
 import difflib
+import reconstructor
 
 # Load environment variables from .env file
 load_dotenv()
@@ -18,6 +19,9 @@ app = FastAPI()
 
 # key - transcript ID, value - transcript JSON obj
 transcripts = {}
+
+class TranscriptUpdate(BaseModel):
+    full_text: str
 
 @app.post("/{transcript_id}")
 def register_transcript(transcript_id):
@@ -36,12 +40,6 @@ def get_transcript(transcript_id):
     transcript = transcripts[transcript_id]
     return transcript
 
-class TranscriptUpdate(BaseModel):
-    full_text: str
-
-def tokenize_text(text: str): #-> Tuple[List[str], List[str]]:
-    # Use NLTK or a similar library to tokenize text into words and sentences
-    return ([],[])
 
 def map_words(original_words: List[Word], new_words: List[str], diffs: List[str]): # -> List[dict]:
     # Map new words to original words, preserving timestamps and confidence scores where possible
@@ -54,7 +52,7 @@ async def update_transcript(transcript_id: str, update: TranscriptUpdate):
         raise HTTPException(status_code=404, detail="Transcript not found")
     
     updated_transcript = None
-    # updated_transcript = reconstruct_transcript(transcript, update.full_text)
+    # updated_transcript = reconstructor.reconstruct_transcript(transcript, update.full_text)
     
     transcripts[transcript_id] = updated_transcript
     return {"message": "Transcript updated successfully", "transcript": updated_transcript}
