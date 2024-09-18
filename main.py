@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+import database as db
 import reconstructor
 from utils import update_assemblyai_words
 
@@ -18,10 +19,8 @@ aai.settings.api_key = api_key
 
 app = FastAPI()
 
+
 # key - transcript ID, value - transcript JSON obj
-transcripts = {}
-
-
 class TranscriptUpdate(BaseModel):
     old_text: str
     new_text: str
@@ -29,6 +28,11 @@ class TranscriptUpdate(BaseModel):
 
 @app.post("/{transcript_id}")
 def register_transcript(transcript_id):
+    # First try to fetch it from mongo
+    transcript_document = db.fetch_transcript(transcript_id)
+    if transcript_document:
+        return transcript_document.transcript
+
     try:
         t = aai.Transcript.get_by_id(transcript_id)
     except Exception as e:
@@ -38,42 +42,45 @@ def register_transcript(transcript_id):
             detail=f"Transcript {transcript_id} is not registered. Please use the AAI API to re-transcribe.",
         ) from None
 
-    # TODO: Once we fetch from AAI api, save to Mongo if it doesnt exist?
-
     transcript = t.json_response
     if transcript:
         transcript["sentences"] = t.get_sentences()
         transcript["paragraphs"] = t.get_paragraphs()
-    transcripts[transcript_id] = transcript
+
+    db.create_transcript(transcript)
     return transcript
 
 
 @app.get("/{transcript_id}")
 def get_transcript(transcript_id):
-    if transcript_id not in transcripts:
+    transcript_document = db.fetch_transcript(transcript_id)
+    if not transcript_document:
         raise HTTPException(
             status_code=400,
             detail=f"Please call POST /{transcript_id} to register the transcript first.",
         )
 
-    # TODO: Fetch from mongo
-    transcript = transcripts[transcript_id]
-    return transcript
+    return transcript_document.transcript
 
 
 @app.patch("/transcripts/{transcript_id}")
 async def update_transcript(transcript_id: str, update: TranscriptUpdate):
-    transcript = transcripts.get(transcript_id)
-    if not transcript:
+
+    if update.old_text.strip().lower() == update.new_text.strip().lower():
+        return {"message": "No update needed, both texts are the same"}
+
+    transcript_document = db.fetch_transcript(transcript_id)
+    if not transcript_document:
         raise HTTPException(status_code=404, detail="Transcript not found")
+    transcript = transcript_document.transcript
+    words = update_assemblyai_words(
+        transcript["words"], update.old_text, update.new_text
+    )
 
-    words = update_assemblyai_words(transcript.words, update.old_text, update.new_text)
-
-    # TODO: Test removals / additions / Add DB support?
+    # TODO: Test removals / additions
     updated_transcript = reconstructor.reconstruct_transcript(transcript, words)
 
-    # TODO: update mongo @ transcript id
-    transcripts[transcript_id] = updated_transcript
+    db.update_transcript(transcript_document.id, updated_transcript)
     return {
         "message": "Transcript updated successfully",
         "transcript": updated_transcript,
@@ -87,7 +94,4 @@ if __name__ == "__main__":
         # trunk-ignore(bandit/B104)
         host="0.0.0.0",
         port=8000,
-        reload=True,
-        log_level="debug",
-        debug=True,
     )
