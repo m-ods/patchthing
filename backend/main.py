@@ -1,3 +1,4 @@
+import json
 import os
 
 import assemblyai as aai
@@ -8,7 +9,7 @@ from pydantic import BaseModel
 
 import database as db
 import reconstructor
-from utils import update_assemblyai_words
+from utils import dictify, update_assemblyai_words
 
 # Load environment variables from .env file
 load_dotenv()
@@ -18,6 +19,7 @@ api_key = os.getenv("ASSEMBLYAI_API_KEY")
 aai.settings.api_key = api_key
 
 app = FastAPI()
+
 
 # key - transcript ID, value - transcript JSON obj
 class TranscriptUpdate(BaseModel):
@@ -43,11 +45,13 @@ def register_transcript(transcript_id):
 
     transcript = t.json_response
     if transcript:
-        transcript["sentences"] = t.get_sentences()
-        transcript["paragraphs"] = t.get_paragraphs()
+        transcript["sentences"] = dictify(t.get_sentences())
+        transcript["paragraphs"] = dictify(t.get_paragraphs())
 
-    db.create_transcript(transcript)
-    return transcript
+    transcript_document = db.create_transcript(transcript)
+    transcript_dict = transcript_document.dict()
+    transcript_dict["id"] = str(transcript_dict["id"])
+    return transcript_dict
 
 
 @app.get("/{transcript_id}")
@@ -58,20 +62,28 @@ def get_transcript(transcript_id):
             status_code=400,
             detail=f"Please call POST /{transcript_id} to register the transcript first.",
         )
-
-    return transcript_document.transcript
+    transcript_dict = transcript_document.dict()
+    transcript_dict["id"] = str(transcript_dict["id"])
+    return transcript_dict
 
 
 @app.patch("/transcripts/{transcript_id}")
 async def update_transcript(transcript_id: str, update: TranscriptUpdate):
 
-    if update.old_text.strip().lower() == update.new_text.strip().lower():
-        return {"message": "No update needed, both texts are the same"}
-
     transcript_document = db.fetch_transcript(transcript_id)
     if not transcript_document:
         raise HTTPException(status_code=404, detail="Transcript not found")
+
     transcript = transcript_document.transcript
+    if transcript["text"].strip().lower() != update.old_text.strip().lower():
+        raise HTTPException(
+            status_code=400,
+            detail="Old text parameter doesnt match text in the DB for that transcript. Please reload.",
+        )
+
+    if update.old_text.strip().lower() == update.new_text.strip().lower():
+        return {"message": "No update needed, both texts are the same"}
+
     words = update_assemblyai_words(
         transcript["words"], update.old_text, update.new_text
     )
@@ -79,22 +91,12 @@ async def update_transcript(transcript_id: str, update: TranscriptUpdate):
     # TODO: Test removals / additions
     updated_transcript = reconstructor.reconstruct_transcript(transcript, words)
 
-    db.update_transcript(transcript_document.id, updated_transcript)
+    db.update_transcript(transcript_document.transcript_id, updated_transcript)
     return {
         "message": "Transcript updated successfully",
         "transcript": updated_transcript,
     }
 
-
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 if __name__ == "__main__":
     print("Starting server on port 8000")
