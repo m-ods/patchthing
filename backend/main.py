@@ -2,13 +2,13 @@ import json
 import os
 
 import assemblyai as aai
+import database as db
+import reconstructor
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
-import database as db
-import reconstructor
 from utils import dictify, update_assemblyai_words
 
 # Load environment variables from .env file
@@ -96,6 +96,15 @@ async def update_transcript(transcript_id: str, update: TranscriptUpdate):
         "message": "Transcript updated successfully",
         "transcript": updated_transcript,
     }
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 if __name__ == "__main__":
