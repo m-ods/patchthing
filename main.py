@@ -94,7 +94,4 @@ if __name__ == "__main__":
         # trunk-ignore(bandit/B104)
         host="0.0.0.0",
         port=8000,
-        reload=True,
-        log_level="debug",
-        debug=True,
     )
