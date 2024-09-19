@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { registerTranscript } from '../services/api';
 
 interface TranscriptRegistrationProps {
   onRegister: (transcriptId: string) => void;
@@ -11,7 +11,7 @@ const TranscriptRegistration: React.FC<TranscriptRegistrationProps> = ({ onRegis
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`http://localhost:8000/${transcriptId}`);
+      await registerTranscript(transcriptId);
       onRegister(transcriptId);
     } catch (error) {
       console.error('Error registering transcript:', error);

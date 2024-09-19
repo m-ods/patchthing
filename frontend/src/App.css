@@ -5,64 +5,124 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   font-family: 'Arial', sans-serif;
   color: #333;
 }
 
+.App-header {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  width: 150px;
+  display: block;
+  margin: 0 auto 1rem;
+}
+
 h1 {
   color: #1e90ff;
-  font-size: 3rem;
-  margin-bottom: 2rem;
-  animation: fadeIn 1s ease-in;
+  font-size: 2rem;
+  margin: 0;
 }
 
-.input-container {
-  width: 80%;
-  max-width: 600px;
-  margin-bottom: 2rem;
-}
-
-input[type="text"], textarea {
+.App-main {
   width: 100%;
-  padding: 1rem;
-  font-size: 1.2rem;
-  border: 2px solid #1e90ff;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
 }
 
-input[type="text"]:focus, textarea:focus {
-  outline: none;
-  box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+.transcript-editor {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 900px;
+  margin: 2rem auto;
 }
 
-button {
+.transcript-editor h2 {
+  font-family: 'Playfair Display', serif;
+  color: #1e90ff;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.editable-text {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.confirm-changes-button {
   background-color: #1e90ff;
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-changes-button:hover {
+  background-color: #1c7ed6;
+}
+
+.audio-player {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.control-button {
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-button:hover {
-  background-color: #4169e1;
-  transform: translateY(-2px);
+.control-button:hover {
+  background-color: #1c7ed6;
+  transform: scale(1.05);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.progress-bar {
+  flex-grow: 1;
+  height: 6px;
+  background-color: #f0f8ff;
+  margin: 0 1rem;
+  border-radius: 3px;
+  overflow: hidden;
 }
 
-.button-spacing {
-  margin-top: 1rem;
+.progress {
+  height: 100%;
+  background-color: #1e90ff;
+  transition: width 0.1s linear;
 }
 
-.logo {
-  width: 220px;
-  margin-bottom: 1rem;
+.time-display {
+  font-size: 0.9rem;
+  color: #666;
+  min-width: 100px;
+  text-align: right;
+}
+
+.editable-text span.active {
+  background-color: #1e90ff;
+  color: white;
 }

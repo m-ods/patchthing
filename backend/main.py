@@ -31,7 +31,7 @@ class TranscriptUpdate(BaseModel):
 def register_transcript(transcript_id):
     # First try to fetch it from mongo
     transcript_document = db.fetch_transcript(transcript_id)
-    if transcript_document:
+    if transcript_document is not None:
         return transcript_document.transcript
 
     try:

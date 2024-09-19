@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TranscriptData } from '../types/transcript'; // Add this import
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -8,7 +9,7 @@ export const registerTranscript = async (transcriptId: string) => {
 };
 
 export const getTranscript = async (transcriptId: string) => {
-  const response = await axios.get(`${API_BASE_URL}/${transcriptId}`);
+  const response = await axios.get<TranscriptData>(`${API_BASE_URL}/${transcriptId}`);
   return response.data;
 };
 
