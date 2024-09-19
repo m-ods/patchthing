@@ -120,8 +120,9 @@ def reconstruct_paragraphs(sentences: List[Sentence]) -> List[Paragraph]:
     return paragraphs
 
 
-def reconstruct_transcript(transcript: Dict, words: List[Dict]) -> Dict:
-    transcript["words"] = dictify(reconstruct_words(words))
+def reconstruct_transcript(transcript: Dict, words_dict: List[Dict]) -> Dict:
+    words = reconstruct_words(words_dict)
+    transcript["words"] = dictify(words)
     transcript["utterances"] = dictify(reconstruct_utterances(words))
     sentences = reconstruct_sentences(words)
     transcript["sentences"] = dictify(sentences)

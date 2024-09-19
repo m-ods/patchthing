@@ -1,7 +1,9 @@
 import os
+import time
 from typing import Dict, Optional
 
 import assemblyai as aai
+from bson.objectid import ObjectId
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from pymongo.mongo_client import MongoClient
@@ -22,16 +24,29 @@ collection = db["transcripts"]
 
 
 class TranscriptDocument(BaseModel):
-    id: str = Field(default=None, alias="_id")
+    id: ObjectId = Field(default=None, alias="_id")
+    transcript_id: str
     transcript: Dict
+    created_at: int
+    updated_at: int
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str,
+        }
 
 
 def create_transcript(transcript: Dict):
-    doc = TranscriptDocument(id=transcript["id"], transcript=transcript)
+    doc = TranscriptDocument(
+        _id=ObjectId(),
+        transcript_id=transcript["id"],
+        transcript=transcript,
+        created_at=int(time.time()),
+        updated_at=int(time.time()),
+    )
+
     try:
         collection.insert_one(doc.dict(by_alias=True))
         return doc
@@ -43,7 +58,7 @@ def create_transcript(transcript: Dict):
 def fetch_transcript(transcript_id: str) -> Optional[TranscriptDocument]:
     # Fetch the document from MongoDB by _id
     try:
-        result = collection.find_one({"_id": transcript_id})
+        result = collection.find_one({"transcript_id": transcript_id})
         if result:
             # Create a TranscriptDocument from the result
             return TranscriptDocument(
@@ -62,8 +77,17 @@ def update_transcript(
 ) -> Optional[TranscriptDocument]:
     # Update the existing transcript in MongoDB
     try:
-        collection.update_one({"_id": transcript_id}, {"$set": transcript})
-        return fetch_transcript(transcript_id)
+        transcript_doc = fetch_transcript(transcript_id)
+        if transcript_doc:
+            transcript_doc.updated_at = int(time.time())
+            transcript_doc.transcript = transcript
+            collection.update_one(
+                {"_id": ObjectId(transcript_doc.id)},
+                {"$set": transcript_doc.dict(by_alias=True)},
+            )
+            return transcript_doc
+        else:
+            raise Exception("Something went wrong fetching the document when updating")
     except Exception as e:
         print(f"An error occurred during updating: {e}")
         raise e
