@@ -1,6 +1,5 @@
 import json
 import os
-
 import assemblyai as aai
 import database as db
 import reconstructor
@@ -89,7 +88,7 @@ async def update_transcript(transcript_id: str, update: TranscriptUpdate):
     )
 
     # TODO: Test removals / additions
-    updated_transcript = reconstructor.reconstruct_transcript(transcript, words)
+    updated_transcript = reconstructor.reconstruct_transcript(transcript, words, update.new_text)
 
     db.update_transcript(transcript_document.transcript_id, updated_transcript)
     return {
@@ -100,7 +99,7 @@ async def update_transcript(transcript_id: str, update: TranscriptUpdate):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://192.168.1.9:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

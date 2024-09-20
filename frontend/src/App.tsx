@@ -7,8 +7,7 @@ const App: React.FC = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} alt="Logo" className="logo" />
-        <h1>Transcript Editor</h1>
+        <h1 style={{ fontFamily: "Arial"}}>📞 Sales Call Recording</h1>
       </header>
       <main className="App-main">
         <TranscriptEditor />
