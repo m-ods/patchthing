@@ -1,4 +1,4 @@
-# Patch-thing
+# 🧩 Patch-thing
 
 Patch-thing is a FastAPI-based backend service for managing and updating transcripts. It integrates with AssemblyAI for transcription services and uses MongoDB for data storage.
 
